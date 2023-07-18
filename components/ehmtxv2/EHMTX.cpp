@@ -397,7 +397,7 @@ namespace esphome
       if (this->clock->now().is_valid())
       {
         ESP_LOGD(TAG, "time sync => start running");
-#ifndef USE_ESP8266
+#if !defined USE_ESP8266 && !defined EHMTXv2_ALLOW_EMPTY_SCREEN
         this->bitmap_screen(EHMTX_LOGO, 1, 10);
         this->bitmap_small(EHMTX_SLOGO, EHMTX_VERSION, 1, 10);
 #endif
@@ -885,7 +885,7 @@ namespace esphome
     screen->mode = MODE_CLOCK;
     screen->default_font = default_font;
     screen->screen_time_ = screen_time;
-    screen->endtime = this->clock->now().timestamp + lifetime * 60;
+    screen->endtime = (lifetime < 0) ? std::numeric_limits<time_t>::max() : this->clock->now().timestamp + lifetime * 60;
     screen->status();
   }
 
