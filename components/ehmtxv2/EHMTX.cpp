@@ -593,7 +593,7 @@ namespace esphome
           {
             for (auto *t : on_next_screen_triggers_)
             {
-              t->process(this->queue[this->screen_pointer]->icon_name, this->queue[this->screen_pointer]->text);
+              t->process(this->queue[this->screen_pointer]->icon_name, this->queue[this->screen_pointer]->text, this->queue[this->screen_pointer]->mode);
             }
           }
         }
@@ -697,20 +697,20 @@ namespace esphome
           if (this->string_has_ending(icon_name, "*"))
           {
             std::string comparename = icon_name.substr(0, icon_name.length() - 1);
-            
+
             if (this->queue[i]->icon_name.rfind(comparename, 0) != 0)
             {
               force = false;
             }
           }
-          else if(strcmp(this->queue[i]->icon_name.c_str(), icon_name.c_str()) != 0)
+          else if (strcmp(this->queue[i]->icon_name.c_str(), icon_name.c_str()) != 0)
           {
             force = false;
           }
         }
         if (force)
         {
-          ESP_LOGW(TAG, "del_screen: slot %d deleted",i);
+          ESP_LOGW(TAG, "del_screen: slot %d deleted", i);
           this->queue[i]->mode = MODE_EMPTY;
           this->queue[i]->endtime = 0;
           if (i == this->screen_pointer)
@@ -1141,9 +1141,9 @@ namespace esphome
     }
   }
 
-  void EHMTXNextScreenTrigger::process(std::string iconname, std::string text)
+  void EHMTXNextScreenTrigger::process(std::string iconname, std::string text, uint8_t mode)
   {
-    this->trigger(iconname, text);
+    this->trigger(iconname, text, mode);
   }
 
   void EHMTXAddScreenTrigger::process(std::string iconname, uint8_t mode)

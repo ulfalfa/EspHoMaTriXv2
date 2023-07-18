@@ -409,7 +409,7 @@ async def to_code(config):
     
     for conf in config.get(CONF_ON_NEXT_SCREEN, []):
         trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)
-        await automation.build_automation(trigger, [(cg.std_string, "icon"), (cg.std_string, "text")], conf)
+        await automation.build_automation(trigger, [(cg.std_string, "icon"), (cg.std_string, "text"), (cg.uint8, "mode")], conf)
 
     for conf in config.get(CONF_ON_NEXT_CLOCK, []):
         trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)

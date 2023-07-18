@@ -80,7 +80,7 @@ namespace esphome
     uint16_t hue_ = 0;
     void dump_config();
 #ifdef USE_ESP32
-    PROGMEM Color text_color, alarm_color, rindicator_color,  lindicator_color,clock_color, today_color, weekday_color, rainbow_color;
+    PROGMEM Color text_color, alarm_color, rindicator_color, lindicator_color, clock_color, today_color, weekday_color, rainbow_color;
     PROGMEM Color bitmap[256];
     PROGMEM Color sbitmap[64];
     PROGMEM Color cgauge[8];
@@ -88,7 +88,7 @@ namespace esphome
 #endif
 
 #ifdef USE_ESP8266
-    Color text_color, alarm_color, gauge_color, gauge_bgcolor,rindicator_color,lindicator_color, clock_color, today_color, weekday_color, rainbow_color;
+    Color text_color, alarm_color, gauge_color, gauge_bgcolor, rindicator_color, lindicator_color, clock_color, today_color, weekday_color, rainbow_color;
     EHMTX_Icon *icons[MAXICONS];
     uint8_t gauge_value;
 #endif
@@ -97,11 +97,11 @@ namespace esphome
     int display_rindicator;
     int display_lindicator;
     int display_alarm;
-    uint8_t ticks_per_second=62;
+    uint8_t ticks_per_second = 62;
     bool display_gauge;
     bool is_running = false;
     bool show_date;
-    
+
     uint16_t clock_time;
     uint16_t scroll_step;
 
@@ -116,9 +116,9 @@ namespace esphome
     unsigned long last_scroll_time;
     unsigned long last_rainbow_time;
     unsigned long last_anim_time;
-    time_t next_action_time = 0; // when is the next screen change
+    time_t next_action_time = 0;   // when is the next screen change
     uint32_t tick_next_action = 0; // when is the next screen change
-    uint32_t ticks_ = 0; // when is the next screen change
+    uint32_t ticks_ = 0;           // when is the next screen change
 
     void remove_expired_queue_element();
     uint8_t find_oldest_queue_element();
@@ -140,9 +140,9 @@ namespace esphome
     void set_display(addressable_light::AddressableLightDisplay *disp);
     void set_hold_time(uint16_t t = 30);
     void set_clock_time(uint16_t t = 10);
-    void set_show_day_of_week(bool b=true);
-    void set_show_seconds(bool b=false);
-    void set_show_date(bool b=true);
+    void set_show_day_of_week(bool b = true);
+    void set_show_seconds(bool b = false);
+    void set_show_date(bool b = true);
     void set_brightness(int b);
     void set_display_on();
     void set_display_off();
@@ -155,7 +155,7 @@ namespace esphome
     void set_today_color(int r, int g, int b);
     void set_weekday_color(int r, int g, int b);
     void show_alarm(int r = CA_RED, int g = CA_GREEN, int b = CA_BLUE, int s = 2);
-    void show_gauge(int v, int r = C_RED, int g = C_GREEN, int b = C_BLUE,int bgr = CG_GREY, int bgg = CG_GREY, int bgb = CG_GREY); // int because of register_service
+    void show_gauge(int v, int r = C_RED, int g = C_GREEN, int b = C_BLUE, int bgr = CG_GREY, int bgg = CG_GREY, int bgb = CG_GREY); // int because of register_service
     void hide_gauge();
     void hide_rindicator();
     void hide_lindicator();
@@ -169,7 +169,7 @@ namespace esphome
 
     void bitmap_screen(std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME);
     void color_gauge(std::string text);
-    void bitmap_small(std::string, std::string,int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE);
+    void bitmap_small(std::string, std::string, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE);
     void rainbow_icon_screen(std::string icon_name, std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true);
     void rainbow_text_screen(std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true);
     void rainbow_clock_screen(int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true);
@@ -228,11 +228,11 @@ namespace esphome
     int xpos();
   };
 
-  class EHMTXNextScreenTrigger : public Trigger<std::string, std::string>
+  class EHMTXNextScreenTrigger : public Trigger<std::string, std::string, uint8_t>
   {
   public:
     explicit EHMTXNextScreenTrigger(EHMTX *parent) { parent->add_on_next_screen_trigger(this); }
-    void process(std::string, std::string);
+    void process(std::string, std::string, uint8_t);
   };
 
   class EHMTXAddScreenTrigger : public Trigger<std::string, uint8_t>

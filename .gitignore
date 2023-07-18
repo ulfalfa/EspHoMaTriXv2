@@ -1,5 +1,6 @@
 components/ehmtx/__init__ copy._py
 components/ehmtx/__pycache__/__init__.cpython-39.pyc
+components/ehmtxv2/__pycache__/__init__.cpython-39.pyc
 venv
 .esphome/
 _icons/
