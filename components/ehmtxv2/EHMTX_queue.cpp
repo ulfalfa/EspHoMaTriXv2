@@ -14,6 +14,7 @@ namespace esphome
     this->icon = 0;
     this->text = "";
     this->default_font = true;
+    this->id = "";
   }
 
   void EHMTX_queue::status()
@@ -24,42 +25,42 @@ namespace esphome
       ESP_LOGD(TAG, ("empty slot"));
       break;
     case MODE_BLANK:
-      ESP_LOGD(TAG, "queue: blank screen for %d sec", this->screen_time_);
+      ESP_LOGD(TAG, "queue[%s]: blank screen for %d sec", this->id.c_str(), this->screen_time_);
       break;
     case MODE_CLOCK:
-      ESP_LOGD(TAG, "queue: clock for: %d sec", this->screen_time_);
+      ESP_LOGD(TAG, "queue[%s]: clock for: %d sec", this->id.c_str(), this->screen_time_);
       break;
     case MODE_DATE:
-      ESP_LOGD(TAG, "queue: date for: %d sec", this->screen_time_);
+      ESP_LOGD(TAG, "queue[%s]: date for: %d sec", this->id.c_str(), this->screen_time_);
       break;
     case MODE_FULL_SCREEN:
-      ESP_LOGD(TAG, "queue: full screen: \"%s\" for: %d sec", this->icon_name.c_str(), this->screen_time_);
+      ESP_LOGD(TAG, "queue[%s]: full screen: \"%s\" for: %d sec", this->id.c_str(), this->icon_name.c_str(), this->screen_time_);
       break;
     case MODE_ICON_SCREEN:
-      ESP_LOGD(TAG, "queue: icon screen: \"%s\" text: %s for: %d sec", this->icon_name.c_str(), this->text.c_str(), this->screen_time_);
+      ESP_LOGD(TAG, "queue[%s]: icon screen: \"%s\" text: %s for: %d sec", this->id.c_str(), this->icon_name.c_str(), this->text.c_str(), this->screen_time_);
       break;
     case MODE_TEXT_SCREEN:
-      ESP_LOGD(TAG, "queue: text text: \"%s\" for: %d sec", this->text.c_str(), this->screen_time_);
+      ESP_LOGD(TAG, "queue[%s]: text text: \"%s\" for: %d sec", this->id.c_str(), this->text.c_str(), this->screen_time_);
       break;
     case MODE_RAINBOW_ICON:
-      ESP_LOGD(TAG, "queue: rainbow icon: \"%s\" text: %s for: %d sec", this->icon_name.c_str(), this->text.c_str(), this->screen_time_);
+      ESP_LOGD(TAG, "queue[%s]: rainbow icon: \"%s\" text: %s for: %d sec", this->id.c_str(), this->icon_name.c_str(), this->text.c_str(), this->screen_time_);
       break;
     case MODE_RAINBOW_TEXT:
-      ESP_LOGD(TAG, "queue: rainbow text: \"%s\" for: %d sec", this->text.c_str(), this->screen_time_);
+      ESP_LOGD(TAG, "queue[%s]: rainbow text: \"%s\" for: %d sec", this->id.c_str(), this->text.c_str(), this->screen_time_);
       break;
     case MODE_RAINBOW_CLOCK:
-      ESP_LOGD(TAG, "queue: clock for: %d sec", this->screen_time_);
+      ESP_LOGD(TAG, "queue[%s]: clock for: %d sec", this->id.c_str(), this->screen_time_);
       break;
     case MODE_RAINBOW_DATE:
-      ESP_LOGD(TAG, "queue: date for: %d sec", this->screen_time_);
+      ESP_LOGD(TAG, "queue[%s]: date for: %d sec", this->id.c_str(), this->screen_time_);
       break;
 
 #ifndef USE_ESP8266
     case MODE_BITMAP_SCREEN:
-      ESP_LOGD(TAG, "queue: bitmap for: %d sec", this->screen_time_);
+      ESP_LOGD(TAG, "queue[%s]: bitmap for: %d sec", this->id.c_str(), this->screen_time_);
       break;
     case MODE_BITMAP_SMALL:
-      ESP_LOGD(TAG, "queue: small bitmap for: %d sec", this->screen_time_);
+      ESP_LOGD(TAG, "queue[%s]: small bitmap for: %d sec", this->id.c_str(), this->screen_time_);
       break;
 #endif
     default:

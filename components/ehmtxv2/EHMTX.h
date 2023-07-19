@@ -46,6 +46,10 @@ enum show_mode : uint8_t
   MODE_BITMAP_SMALL = 12
 };
 
+static const char *const EMPTY_ID = "__EMPTY__";
+static const char *const DATE_ID = "__DATE__";
+static const char *const CLOCK_ID = "__CLOCK__";
+
 namespace esphome
 {
   class EHMTX_queue;
@@ -71,6 +75,7 @@ namespace esphome
     std::vector<EHMTXNextClockTrigger *> on_next_clock_triggers_;
     std::vector<EHMTXAddScreenTrigger *> on_add_screen_triggers_;
     EHMTX_queue *find_icon_queue_element(uint8_t icon);
+    EHMTX_queue *find_queue_element_byid(std::string id);
     EHMTX_queue *find_free_queue_element();
 
   public:
@@ -123,7 +128,7 @@ namespace esphome
     void remove_expired_queue_element();
     uint8_t find_oldest_queue_element();
     uint8_t find_icon_in_queue(std::string);
-    void force_screen(std::string name, int mode = MODE_ICON_SCREEN);
+    void force_screen(std::string id);
     void add_icon(EHMTX_Icon *icon);
     bool show_display = false;
     uint8_t find_icon(std::string name);
@@ -160,21 +165,22 @@ namespace esphome
     void hide_rindicator();
     void hide_lindicator();
     void hide_alarm();
-    void full_screen(std::string icon, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME);
-    void icon_screen(std::string icon, std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE);
-    void text_screen(std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE);
-    void clock_screen(int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE);
-    void date_screen(int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE);
-    void blank_screen(int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME);
 
-    void bitmap_screen(std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME);
+    void full_screen(std::string id, std::string icon, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME);
+    void icon_screen(std::string id, std::string icon, std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE);
+    void text_screen(std::string id, std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE);
+    void clock_screen(std::string id, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE);
+    void date_screen(std::string id, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE);
+    void blank_screen(std::string id, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME);
+    void bitmap_screen(std::string id, std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME);
     void color_gauge(std::string text);
-    void bitmap_small(std::string, std::string, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE);
-    void rainbow_icon_screen(std::string icon_name, std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true);
-    void rainbow_text_screen(std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true);
-    void rainbow_clock_screen(int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true);
-    void rainbow_date_screen(int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true);
-    void del_screen(std::string icon, int mode = MODE_ICON_SCREEN);
+    void bitmap_small(std::string id, std::string, std::string, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE);
+    void rainbow_icon_screen(std::string id, std::string icon_name, std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true);
+    void rainbow_text_screen(std::string id, std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true);
+    void rainbow_clock_screen(std::string id, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true);
+    void rainbow_date_screen(std::string id, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true);
+
+    void del_screen(std::string id);
 
     void draw_gauge();
     void draw_alarm();
@@ -210,10 +216,12 @@ namespace esphome
 #ifdef USE_ESP32
     PROGMEM std::string text;
     PROGMEM std::string icon_name;
+    PROGMEM std::string id;
 #endif
 #ifdef USE_ESP8266
     std::string text;
     std::string icon_name;
+    std::string id;
 #endif
 
     EHMTX_queue(EHMTX *config);
@@ -228,11 +236,11 @@ namespace esphome
     int xpos();
   };
 
-  class EHMTXNextScreenTrigger : public Trigger<std::string, std::string, uint8_t>
+  class EHMTXNextScreenTrigger : public Trigger<std::string, uint8_t>
   {
   public:
     explicit EHMTXNextScreenTrigger(EHMTX *parent) { parent->add_on_next_screen_trigger(this); }
-    void process(std::string, std::string, uint8_t);
+    void process(std::string, uint8_t);
   };
 
   class EHMTXAddScreenTrigger : public Trigger<std::string, uint8_t>
@@ -242,25 +250,18 @@ namespace esphome
     void process(std::string, uint8_t);
   };
 
-  class EHMTXIconErrorTrigger : public Trigger<std::string>
+  class EHMTXIconErrorTrigger : public Trigger<std::string, std::string>
   {
   public:
     explicit EHMTXIconErrorTrigger(EHMTX *parent) { parent->add_on_icon_error_trigger(this); }
-    void process(std::string);
-  };
-
-  class EHMTXExpiredScreenTrigger : public Trigger<std::string, std::string>
-  {
-  public:
-    explicit EHMTXExpiredScreenTrigger(EHMTX *parent) { parent->add_on_expired_screen_trigger(this); }
     void process(std::string, std::string);
   };
 
-  class EHMTXNextClockTrigger : public Trigger<>
+  class EHMTXExpiredScreenTrigger : public Trigger<std::string, uint8_t>
   {
   public:
-    explicit EHMTXNextClockTrigger(EHMTX *parent) { parent->add_on_next_clock_trigger(this); }
-    void process();
+    explicit EHMTXExpiredScreenTrigger(EHMTX *parent) { parent->add_on_expired_screen_trigger(this); }
+    void process(std::string, uint8_t);
   };
 
   class EHMTX_Icon : public display::Animation

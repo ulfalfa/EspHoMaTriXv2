@@ -115,7 +115,7 @@ namespace esphome
   }
 
 #ifndef USE_ESP8266
-  void EHMTX::bitmap_screen(std::string text, int lifetime, int screen_time)
+  void EHMTX::bitmap_screen(std::string id, std::string text, int lifetime, int screen_time)
   {
     ESP_LOGD(TAG, "bitmap screen: lifetime: %d screen_time: %d", lifetime, screen_time);
     const size_t CAPACITY = JSON_ARRAY_SIZE(256);
@@ -136,20 +136,21 @@ namespace esphome
       this->bitmap[i++] = c;
     }
 
-    EHMTX_queue *screen = this->find_free_queue_element();
+    EHMTX_queue *screen = this->find_queue_element_byid(id);
 
+    screen->id = id;
     screen->text = "";
     screen->endtime = this->clock->now().timestamp + lifetime * 60;
     screen->mode = MODE_BITMAP_SCREEN;
     screen->screen_time_ = screen_time;
     for (auto *t : on_add_screen_triggers_)
     {
-      t->process("bitmap", (uint8_t)screen->mode);
+      t->process(id, (uint8_t)screen->mode);
     }
     screen->status();
   }
 
-  void EHMTX::bitmap_small(std::string icon, std::string text, int lifetime, int screen_time, bool default_font, int r, int g, int b)
+  void EHMTX::bitmap_small(std::string id, std::string icon, std::string text, int lifetime, int screen_time, bool default_font, int r, int g, int b)
   {
     ESP_LOGD(TAG, "small bitmap screen: text: %s lifetime: %d screen_time: %d", text.c_str(), lifetime, screen_time);
     const size_t CAPACITY = JSON_ARRAY_SIZE(64);
@@ -170,8 +171,8 @@ namespace esphome
       this->sbitmap[i++] = c;
     }
 
-    EHMTX_queue *screen = this->find_free_queue_element();
-
+    EHMTX_queue *screen = this->find_queue_element_byid(id);
+    screen->id = id;
     screen->text = text;
     screen->text_color = Color(r, g, b);
     screen->endtime = this->clock->now().timestamp + lifetime * 60;
@@ -180,17 +181,17 @@ namespace esphome
     screen->calc_scroll_time(text, screen_time);
     for (auto *t : on_add_screen_triggers_)
     {
-      t->process("bitmap small", (uint8_t)screen->mode);
+      t->process(id, (uint8_t)screen->mode);
     }
     screen->status();
   }
 #endif
 #ifdef USE_ESP8266
-  void EHMTX::bitmap_screen(std::string text, int lifetime, int screen_time)
+  void EHMTX::bitmap_screen(std::string id, std::string text, int lifetime, int screen_time)
   {
     ESP_LOGW(TAG, "bitmap_screen is not available on ESP8266");
   }
-  void EHMTX::bitmap_small(std::string i, std::string t, int l, int s, bool f, int r, int g, int b)
+  void EHMTX::bitmap_small(std::string id, std::string i, std::string t, int l, int s, bool f, int r, int g, int b)
   {
     ESP_LOGW(TAG, "bitmap_screen is not available on ESP8266");
   }
@@ -333,30 +334,30 @@ namespace esphome
     register_service(&EHMTX::set_today_color, "set_today_color", {"r", "g", "b"});
     register_service(&EHMTX::set_weekday_color, "set_weekday_color", {"r", "g", "b"});
 
-    register_service(&EHMTX::del_screen, "del_screen", {"icon_name", "mode"});
-    register_service(&EHMTX::force_screen, "force_screen", {"icon_name", "mode"});
+    register_service(&EHMTX::del_screen, "del_screen", {"id"});
+    register_service(&EHMTX::force_screen, "force_screen", {"id"});
 
-    register_service(&EHMTX::full_screen, "full_screen", {"icon_name", "lifetime", "screen_time"});
-    register_service(&EHMTX::icon_screen, "icon_screen", {"icon_name", "text", "lifetime", "screen_time", "default_font", "r", "g", "b"});
-    register_service(&EHMTX::rainbow_icon_screen, "rainbow_icon_screen", {"icon_name", "text", "lifetime", "screen_time", "default_font"});
+    register_service(&EHMTX::full_screen, "full_screen", {"id", "icon_name", "lifetime", "screen_time"});
+    register_service(&EHMTX::icon_screen, "icon_screen", {"id", "icon_name", "text", "lifetime", "screen_time", "default_font", "r", "g", "b"});
+    register_service(&EHMTX::rainbow_icon_screen, "rainbow_icon_screen", {"id", "icon_name", "text", "lifetime", "screen_time", "default_font"});
 
-    register_service(&EHMTX::text_screen, "text_screen", {"text", "lifetime", "screen_time", "default_font", "r", "g", "b"});
-    register_service(&EHMTX::rainbow_text_screen, "rainbow_text_screen", {"text", "lifetime", "screen_time", "default_font"});
+    register_service(&EHMTX::text_screen, "text_screen", {"id", "text", "lifetime", "screen_time", "default_font", "r", "g", "b"});
+    register_service(&EHMTX::rainbow_text_screen, "rainbow_text_screen", {"id", "text", "lifetime", "screen_time", "default_font"});
 
-    register_service(&EHMTX::clock_screen, "clock_screen", {"lifetime", "screen_time", "default_font", "r", "g", "b"});
+    register_service(&EHMTX::clock_screen, "clock_screen", {"id", "lifetime", "screen_time", "default_font", "r", "g", "b"});
 
-    register_service(&EHMTX::rainbow_clock_screen, "rainbow_clock_screen", {"lifetime", "screen_time", "default_font"});
+    register_service(&EHMTX::rainbow_clock_screen, "rainbow_clock_screen", {"id", "lifetime", "screen_time", "default_font"});
 
-    register_service(&EHMTX::date_screen, "date_screen", {"lifetime", "screen_time", "default_font", "r", "g", "b"});
-    register_service(&EHMTX::rainbow_date_screen, "rainbow_date_screen", {"lifetime", "screen_time", "default_font"});
+    register_service(&EHMTX::date_screen, "date_screen", {"id", "lifetime", "screen_time", "default_font", "r", "g", "b"});
+    register_service(&EHMTX::rainbow_date_screen, "rainbow_date_screen", {"id", "lifetime", "screen_time", "default_font"});
 
-    register_service(&EHMTX::blank_screen, "blank_screen", {"lifetime", "screen_time"});
+    register_service(&EHMTX::blank_screen, "blank_screen", {"id", "lifetime", "screen_time"});
 
     register_service(&EHMTX::set_brightness, "brightness", {"value"});
 #ifndef USE_ESP8266
     register_service(&EHMTX::color_gauge, "color_gauge", {"colors"});
-    register_service(&EHMTX::bitmap_screen, "bitmap_screen", {"icon", "lifetime", "screen_time"});
-    register_service(&EHMTX::bitmap_small, "bitmap_small", {"icon", "text", "lifetime", "screen_time", "default_font", "r", "g", "b"});
+    register_service(&EHMTX::bitmap_screen, "bitmap_screen", {"id", "icon", "lifetime", "screen_time"});
+    register_service(&EHMTX::bitmap_small, "bitmap_small", {"id", "icon", "text", "lifetime", "screen_time", "default_font", "r", "g", "b"});
 #endif
 
     ESP_LOGD(TAG, "Setup and running!");
@@ -382,10 +383,11 @@ namespace esphome
     ESP_LOGD(TAG, "hide alarm");
   }
 
-  void EHMTX::blank_screen(int lifetime, int showtime)
+  void EHMTX::blank_screen(std::string id, int lifetime, int showtime)
   {
-    auto scr = this->find_free_queue_element();
+    auto scr = this->find_queue_element_byid(id);
     scr->screen_time_ = showtime;
+    scr->id = id;
     scr->mode = MODE_BLANK;
     scr->endtime = this->clock->now().timestamp + lifetime * 60;
   }
@@ -413,28 +415,17 @@ namespace esphome
     }
   }
 
-  void EHMTX::force_screen(std::string icon_name, int mode)
+  void EHMTX::force_screen(std::string id)
   {
     for (uint8_t i = 0; i < MAXQUEUE; i++)
     {
-      if (this->queue[i]->mode == mode)
+      if (strcmp(this->queue[i]->id.c_str(), id.c_str()) == 0)
       {
-        bool force = true;
-        if ((mode == MODE_ICON_SCREEN) || (mode == MODE_FULL_SCREEN) || (mode == MODE_RAINBOW_ICON))
-        {
-          if (strcmp(this->queue[i]->icon_name.c_str(), icon_name.c_str()) != 0)
-          {
-            force = false;
-          }
-          if (force)
-          {
-            ESP_LOGD(TAG, "force_screen: found position: %d", i);
-            this->queue[i]->last_time = 0;
-            this->queue[i]->endtime += this->queue[i]->screen_time_;
-            this->next_action_time = this->clock->now().timestamp;
-            ESP_LOGW(TAG, "force_screen: icon %s in mode %d", icon_name.c_str(), mode);
-          }
-        }
+        ESP_LOGD(TAG, "force_screen: found position: %d", i);
+        this->queue[i]->last_time = 0;
+        this->queue[i]->endtime += this->queue[i]->screen_time_;
+        this->next_action_time = this->clock->now().timestamp;
+        ESP_LOGW(TAG, "force_screen: id %s in mode %d", this->queue[i]->id.c_str(), this->queue[i]->mode);
       }
     }
   }
@@ -486,7 +477,6 @@ namespace esphome
   {
     if (this->clock->now().is_valid())
     {
-      std::string infotext;
       time_t ts = this->clock->now().timestamp;
 
       for (size_t i = 0; i < MAXQUEUE; i++)
@@ -499,37 +489,7 @@ namespace esphome
             ESP_LOGD(TAG, "remove expired queue element: slot %d: mode: %d icon_name: %s text: %s", i, this->queue[i]->mode, this->queue[i]->icon_name.c_str(), this->queue[i]->text.c_str());
             for (auto *t : on_expired_screen_triggers_)
             {
-              infotext = "";
-              switch (this->queue[i]->mode)
-              {
-              case MODE_EMPTY:
-                break;
-              case MODE_BLANK:
-                break;
-              case MODE_CLOCK:
-                infotext = "clock";
-                break;
-              case MODE_DATE:
-                infotext = "clock";
-                break;
-              case MODE_FULL_SCREEN:
-                infotext = "full screen " + this->queue[i]->icon_name;
-                break;
-              case MODE_ICON_SCREEN:
-              case MODE_RAINBOW_ICON:
-                infotext = this->queue[i]->icon_name.c_str();
-                break;
-              case MODE_RAINBOW_TEXT:
-              case MODE_TEXT_SCREEN:
-                infotext = "TEXT";
-                break;
-              case MODE_BITMAP_SCREEN:
-                infotext = "BITMAP";
-                break;
-              default:
-                break;
-              }
-              t->process(this->queue[i]->icon_name, infotext);
+              t->process(this->queue[i]->id, this->queue[i]->mode);
             }
           }
           this->queue[i]->mode = MODE_EMPTY;
@@ -583,20 +543,10 @@ namespace esphome
             this->icons[this->queue[this->screen_pointer]->icon]->set_frame(0);
           }
           this->next_action_time = this->queue[this->screen_pointer]->last_time;
-          // Todo switch for Triggers
-          if (this->queue[this->screen_pointer]->mode == MODE_CLOCK)
+
+          for (auto *t : on_next_screen_triggers_)
           {
-            for (auto *t : on_next_clock_triggers_)
-            {
-              t->process();
-            }
-          }
-          else
-          {
-            for (auto *t : on_next_screen_triggers_)
-            {
-              t->process(this->queue[this->screen_pointer]->icon_name, this->queue[this->screen_pointer]->text, this->queue[this->screen_pointer]->mode);
-            }
+            t->process(this->queue[this->screen_pointer]->id, this->queue[this->screen_pointer]->mode);
           }
         }
         else
@@ -686,45 +636,26 @@ namespace esphome
     this->special_font = font;
   }
 
-  void EHMTX::del_screen(std::string icon_name, int mode)
+  void EHMTX::del_screen(std::string id)
   {
     for (uint8_t i = 0; i < MAXQUEUE; i++)
     {
-      if (this->queue[i]->mode == mode)
+      if (strcmp(this->queue[i]->id.c_str(), id.c_str()) == 0)
       {
-        bool force = true;
-        ESP_LOGD(TAG, "del_screen: icon %s in position: %s mode %d", icon_name.c_str(), this->queue[i]->icon_name.c_str(), mode);
-        if ((mode == MODE_ICON_SCREEN) || (mode == MODE_FULL_SCREEN) || (mode == MODE_RAINBOW_ICON))
+        ESP_LOGD(TAG, "del_screen: id %s in position: %s mode %d", id.c_str(), this->queue[i]->icon_name.c_str(), this->queue[i]->mode);
+        ESP_LOGW(TAG, "del_screen: slot %d deleted", i);
+        this->queue[i]->mode = MODE_EMPTY;
+        this->queue[i]->endtime = 0;
+        this->queue[i]->id = EMPTY_ID;
+        if (i == this->screen_pointer)
         {
-          if (this->string_has_ending(icon_name, "*"))
-          {
-            std::string comparename = icon_name.substr(0, icon_name.length() - 1);
-
-            if (this->queue[i]->icon_name.rfind(comparename, 0) != 0)
-            {
-              force = false;
-            }
-          }
-          else if (strcmp(this->queue[i]->icon_name.c_str(), icon_name.c_str()) != 0)
-          {
-            force = false;
-          }
-        }
-        if (force)
-        {
-          ESP_LOGW(TAG, "del_screen: slot %d deleted", i);
-          this->queue[i]->mode = MODE_EMPTY;
-          this->queue[i]->endtime = 0;
-          if (i == this->screen_pointer)
-          {
-            this->next_action_time = this->clock->now().timestamp;
-          }
+          this->next_action_time = this->clock->now().timestamp;
         }
       }
     }
   }
 
-  void EHMTX::icon_screen(std::string iconname, std::string text, int lifetime, int screen_time, bool default_font, int r, int g, int b)
+  void EHMTX::icon_screen(std::string id, std::string iconname, std::string text, int lifetime, int screen_time, bool default_font, int r, int g, int b)
   {
     uint8_t icon = this->find_icon(iconname.c_str());
 
@@ -734,13 +665,14 @@ namespace esphome
       icon = 0;
       for (auto *t : on_icon_error_triggers_)
       {
-        t->process(iconname);
+        t->process(id, iconname);
       }
     }
-    EHMTX_queue *screen = this->find_icon_queue_element(icon);
+    EHMTX_queue *screen = this->find_queue_element_byid(id);
 
+    screen->id = id;
     screen->text = text;
-    screen->endtime = this->clock->now().timestamp + lifetime * 60;
+    screen->endtime = (lifetime < 0) ? std::numeric_limits<time_t>::max() : this->clock->now().timestamp + lifetime * 60;
     screen->text_color = Color(r, g, b);
     screen->default_font = default_font;
     screen->mode = MODE_ICON_SCREEN;
@@ -749,13 +681,13 @@ namespace esphome
     screen->calc_scroll_time(text, screen_time);
     for (auto *t : on_add_screen_triggers_)
     {
-      t->process(screen->icon_name, (uint8_t)screen->mode);
+      t->process(screen->id, (uint8_t)screen->mode);
     }
     ESP_LOGD(TAG, "icon screen icon: %d iconname: %s text: %s lifetime: %d screen_time: %d", icon, iconname.c_str(), text.c_str(), lifetime, screen_time);
     screen->status();
   }
 
-  void EHMTX::rainbow_icon_screen(std::string iconname, std::string text, int lifetime, int screen_time, bool default_font)
+  void EHMTX::rainbow_icon_screen(std::string id, std::string iconname, std::string text, int lifetime, int screen_time, bool default_font)
   {
     uint8_t icon = this->find_icon(iconname.c_str());
 
@@ -765,14 +697,13 @@ namespace esphome
       icon = 0;
       for (auto *t : on_icon_error_triggers_)
       {
-        t->process(iconname);
+        t->process(id, iconname);
       }
     }
-    EHMTX_queue *screen = this->find_icon_queue_element(icon);
-
+    EHMTX_queue *screen = this->find_queue_element_byid(id);
+    screen->id = id;
     screen->text = text;
-
-    screen->endtime = this->clock->now().timestamp + lifetime * 60;
+    screen->endtime = (lifetime < 0) ? std::numeric_limits<time_t>::max() : this->clock->now().timestamp + lifetime * 60;
     screen->default_font = default_font;
     screen->mode = MODE_RAINBOW_ICON;
     screen->icon_name = iconname;
@@ -780,17 +711,18 @@ namespace esphome
     screen->calc_scroll_time(text, screen_time);
     for (auto *t : on_add_screen_triggers_)
     {
-      t->process(screen->icon_name, (uint8_t)screen->mode);
+      t->process(id, (uint8_t)screen->mode);
     }
     ESP_LOGD(TAG, "rainbow icon screen icon: %d iconname: %s text: %s lifetime: %d screen_time: %d", icon, iconname.c_str(), text.c_str(), lifetime, screen_time);
     screen->status();
   }
 
-  void EHMTX::rainbow_clock_screen(int lifetime, int screen_time, bool default_font)
+  void EHMTX::rainbow_clock_screen(std::string id, int lifetime, int screen_time, bool default_font)
   {
-    EHMTX_queue *screen = this->find_free_queue_element();
+    EHMTX_queue *screen = this->find_queue_element_byid(id);
 
     ESP_LOGD(TAG, "rainbow_clock_screen lifetime: %d screen_time: %d", lifetime, screen_time);
+    screen->id = id;
     screen->mode = MODE_RAINBOW_CLOCK;
     screen->default_font = default_font;
     if (EHMTXv2_CLOCK_INTERVALL == 0 || (EHMTXv2_CLOCK_INTERVALL > screen_time))
@@ -801,21 +733,22 @@ namespace esphome
     {
       screen->screen_time_ = EHMTXv2_CLOCK_INTERVALL - 2;
     }
-    screen->endtime = this->clock->now().timestamp + lifetime * 60;
+    screen->endtime = (lifetime < 0) ? std::numeric_limits<time_t>::max() : this->clock->now().timestamp + lifetime * 60;
     screen->status();
   }
 
-  void EHMTX::rainbow_date_screen(int lifetime, int screen_time, bool default_font)
+  void EHMTX::rainbow_date_screen(std::string id, int lifetime, int screen_time, bool default_font)
   {
     ESP_LOGD(TAG, "rainbow_date_screen lifetime: %d screen_time: %d", lifetime, screen_time);
     if (this->show_date)
     {
-      EHMTX_queue *screen = this->find_free_queue_element();
+      EHMTX_queue *screen = this->find_queue_element_byid(id);
+      screen->id = id;
 
       screen->mode = MODE_RAINBOW_DATE;
       screen->default_font = default_font;
       screen->screen_time_ = screen_time;
-      screen->endtime = this->clock->now().timestamp + lifetime * 60;
+      screen->endtime = (lifetime < 0) ? std::numeric_limits<time_t>::max() : this->clock->now().timestamp + lifetime * 60;
       screen->status();
     }
     else
@@ -824,12 +757,13 @@ namespace esphome
     }
   }
 
-  void EHMTX::text_screen(std::string text, int lifetime, int screen_time, bool default_font, int r, int g, int b)
+  void EHMTX::text_screen(std::string id, std::string text, int lifetime, int screen_time, bool default_font, int r, int g, int b)
   {
-    EHMTX_queue *screen = this->find_free_queue_element();
+    EHMTX_queue *screen = this->find_queue_element_byid(id);
+    screen->id = id;
 
     screen->text = text;
-    screen->endtime = this->clock->now().timestamp + lifetime * 60;
+    screen->endtime = (lifetime < 0) ? std::numeric_limits<time_t>::max() : this->clock->now().timestamp + lifetime * 60;
     screen->default_font = default_font;
     screen->text_color = Color(r, g, b);
     screen->mode = MODE_TEXT_SCREEN;
@@ -837,18 +771,20 @@ namespace esphome
     screen->status();
   }
 
-  void EHMTX::rainbow_text_screen(std::string text, int lifetime, int screen_time, bool default_font)
+  void EHMTX::rainbow_text_screen(std::string id, std::string text, int lifetime, int screen_time, bool default_font)
   {
-    EHMTX_queue *screen = this->find_free_queue_element();
+    EHMTX_queue *screen = this->find_queue_element_byid(id);
+    screen->id = id;
+
     screen->text = text;
-    screen->endtime = this->clock->now().timestamp + lifetime * 60;
+    screen->endtime = (lifetime < 0) ? std::numeric_limits<time_t>::max() : this->clock->now().timestamp + lifetime * 60;
     screen->default_font = default_font;
     screen->mode = MODE_RAINBOW_TEXT;
     screen->calc_scroll_time(text, screen_time);
     screen->status();
   }
 
-  void EHMTX::full_screen(std::string iconname, int lifetime, int screen_time)
+  void EHMTX::full_screen(std::string id, std::string iconname, int lifetime, int screen_time)
   {
     uint8_t icon = this->find_icon(iconname.c_str());
 
@@ -857,28 +793,30 @@ namespace esphome
       ESP_LOGW(TAG, "full screen: icon %d not found => default: 0", icon);
       for (auto *t : on_icon_error_triggers_)
       {
-        t->process(iconname);
+        t->process(id, iconname);
       }
       icon = 0;
     }
-    EHMTX_queue *screen = this->find_icon_queue_element(icon);
+    EHMTX_queue *screen = this->find_queue_element_byid(id);
+    screen->id = id;
 
     screen->mode = MODE_FULL_SCREEN;
     screen->icon = icon;
     screen->icon_name = iconname;
     screen->screen_time_ = screen_time;
-    screen->endtime = this->clock->now().timestamp + lifetime * 60;
+    screen->endtime = (lifetime < 0) ? std::numeric_limits<time_t>::max() : this->clock->now().timestamp + lifetime * 60;
     for (auto *t : on_add_screen_triggers_)
     {
-      t->process(screen->icon_name, (uint8_t)screen->mode);
+      t->process(id, (uint8_t)screen->mode);
     }
     ESP_LOGD(TAG, "full screen: icon: %d iconname: %s lifetime: %d screen_time:%d ", icon, iconname.c_str(), lifetime, screen_time);
     screen->status();
   }
 
-  void EHMTX::clock_screen(int lifetime, int screen_time, bool default_font, int r, int g, int b)
+  void EHMTX::clock_screen(std::string id, int lifetime, int screen_time, bool default_font, int r, int g, int b)
   {
-    EHMTX_queue *screen = this->find_free_queue_element();
+    EHMTX_queue *screen = this->find_queue_element_byid(id);
+    screen->id = id;
 
     screen->text_color = Color(r, g, b);
     ESP_LOGD(TAG, "clock_screen_color lifetime: %d screen_time: %d red: %d green: %d blue: %d", lifetime, screen_time, r, g, b);
@@ -889,19 +827,19 @@ namespace esphome
     screen->status();
   }
 
-  void EHMTX::date_screen(int lifetime, int screen_time, bool default_font, int r, int g, int b)
+  void EHMTX::date_screen(std::string id, int lifetime, int screen_time, bool default_font, int r, int g, int b)
   {
     ESP_LOGD(TAG, "date_screen lifetime: %d screen_time: %d red: %d green: %d blue: %d", lifetime, screen_time, r, g, b);
     if (this->show_date)
     {
-      EHMTX_queue *screen = this->find_free_queue_element();
-
+      EHMTX_queue *screen = this->find_queue_element_byid(id);
+      screen->id = id;
       screen->text_color = Color(r, g, b);
 
       screen->mode = MODE_DATE;
       screen->screen_time_ = screen_time;
       screen->default_font = default_font;
-      screen->endtime = this->clock->now().timestamp + lifetime * 60;
+      screen->endtime = (lifetime < 0) ? std::numeric_limits<time_t>::max() : this->clock->now().timestamp + lifetime * 60;
       screen->status();
     }
     else
@@ -917,6 +855,19 @@ namespace esphome
       if ((this->queue[i]->mode == MODE_ICON_SCREEN) && (this->queue[i]->icon == icon))
       {
         ESP_LOGD(TAG, "free_screen: found by icon");
+        return this->queue[i];
+      }
+    }
+    return this->find_free_queue_element();
+  }
+
+  EHMTX_queue *EHMTX::find_queue_element_byid(std::string id)
+  {
+    for (size_t i = 0; i < MAXQUEUE; i++)
+    {
+      if (strcmp(this->queue[i]->id.c_str(), id.c_str()) == 0)
+      {
+        ESP_LOGD(TAG, "free_screen: found by id");
         return this->queue[i];
       }
     }
@@ -1143,28 +1094,24 @@ namespace esphome
     }
   }
 
-  void EHMTXNextScreenTrigger::process(std::string iconname, std::string text, uint8_t mode)
+  void EHMTXNextScreenTrigger::process(std::string id, uint8_t mode)
   {
-    this->trigger(iconname, text, mode);
+    this->trigger(id, mode);
   }
 
-  void EHMTXAddScreenTrigger::process(std::string iconname, uint8_t mode)
+  void EHMTXAddScreenTrigger::process(std::string id, uint8_t mode)
   {
-    this->trigger(iconname, mode);
+    this->trigger(id, mode);
   }
 
-  void EHMTXIconErrorTrigger::process(std::string iconname)
+  void EHMTXIconErrorTrigger::process(std::string id, std::string iconname)
   {
-    this->trigger(iconname);
+    this->trigger(id, iconname);
   }
 
-  void EHMTXExpiredScreenTrigger::process(std::string iconname, std::string text)
+  void EHMTXExpiredScreenTrigger::process(std::string id, uint8_t mode)
   {
-    this->trigger(iconname, text);
+    this->trigger(id, mode);
   }
 
-  void EHMTXNextClockTrigger::process()
-  {
-    this->trigger();
-  }
 }
