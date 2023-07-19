@@ -15,6 +15,7 @@ namespace esphome
     this->text = "";
     this->default_font = true;
     this->id = "";
+    this->rainbow = false;
   }
 
   void EHMTX_queue::status()
@@ -42,18 +43,6 @@ namespace esphome
     case MODE_TEXT_SCREEN:
       ESP_LOGD(TAG, "queue[%s]: text text: \"%s\" for: %d sec", this->id.c_str(), this->text.c_str(), this->screen_time_);
       break;
-    case MODE_RAINBOW_ICON:
-      ESP_LOGD(TAG, "queue[%s]: rainbow icon: \"%s\" text: %s for: %d sec", this->id.c_str(), this->icon_name.c_str(), this->text.c_str(), this->screen_time_);
-      break;
-    case MODE_RAINBOW_TEXT:
-      ESP_LOGD(TAG, "queue[%s]: rainbow text: \"%s\" for: %d sec", this->id.c_str(), this->text.c_str(), this->screen_time_);
-      break;
-    case MODE_RAINBOW_CLOCK:
-      ESP_LOGD(TAG, "queue[%s]: clock for: %d sec", this->id.c_str(), this->screen_time_);
-      break;
-    case MODE_RAINBOW_DATE:
-      ESP_LOGD(TAG, "queue[%s]: date for: %d sec", this->id.c_str(), this->screen_time_);
-      break;
 
 #ifndef USE_ESP8266
     case MODE_BITMAP_SCREEN:
@@ -76,13 +65,11 @@ namespace esphome
     int result = 0;
     switch (this->mode)
     {
-    case MODE_RAINBOW_ICON:
     case MODE_BITMAP_SMALL:
     case MODE_ICON_SCREEN:
       startx = 8;
       break;
     case MODE_TEXT_SCREEN:
-    case MODE_RAINBOW_TEXT:
       // no correction
       break;
     default:
@@ -203,11 +190,10 @@ namespace esphome
 
         break;
 #endif
-      case MODE_RAINBOW_CLOCK:
       case MODE_CLOCK:
         if (this->config_->clock->now().is_valid()) // valid time
         {
-          color_ = (this->mode == MODE_RAINBOW_CLOCK) ? this->config_->rainbow_color : this->config_->clock_color;
+          color_ = (this->rainbow) ? this->config_->rainbow_color : this->config_->clock_color;
           time_t ts = this->config_->clock->now().timestamp;
           this->config_->display->strftime(xoffset + 15, yoffset, font, color_, display::TextAlign::BASELINE_CENTER, EHMTXv2_TIME_FORMAT,
                                            this->config_->clock->now());
@@ -215,7 +201,7 @@ namespace esphome
           {
             this->config_->display->draw_pixel_at(0, 0, color_);
           }
-          if (this->mode != MODE_RAINBOW_CLOCK)
+          if (!this->rainbow)
           {
             this->config_->draw_day_of_week();
           }
@@ -225,11 +211,10 @@ namespace esphome
           this->config_->display->print(15 + xoffset, yoffset, font, this->config_->alarm_color, display::TextAlign::BASELINE_CENTER, "!t!");
         }
         break;
-      case MODE_RAINBOW_DATE:
       case MODE_DATE:
         if (this->config_->clock->now().is_valid())
         {
-          color_ = (this->mode == MODE_RAINBOW_DATE) ? this->config_->rainbow_color : this->config_->clock_color;
+          color_ = (this->rainbow) ? this->config_->rainbow_color : this->config_->clock_color;
           time_t ts = this->config_->clock->now().timestamp;
           this->config_->display->strftime(xoffset + 15, yoffset, font, color_, display::TextAlign::BASELINE_CENTER, EHMTXv2_DATE_FORMAT,
                                            this->config_->clock->now());
@@ -237,7 +222,7 @@ namespace esphome
           {
             this->config_->display->draw_pixel_at(0, 0, color_);
           }
-          if (this->mode != MODE_RAINBOW_DATE)
+          if (!this->rainbow)
           {
             this->config_->draw_day_of_week();
           }
@@ -251,9 +236,8 @@ namespace esphome
         this->config_->display->image(0, 0, this->config_->icons[this->icon]);
         break;
       case MODE_ICON_SCREEN:
-      case MODE_RAINBOW_ICON:
       {
-        color_ = (this->mode == MODE_RAINBOW_ICON) ? this->config_->rainbow_color : this->text_color;
+        color_ = (this->rainbow) ? this->config_->rainbow_color : this->text_color;
 #ifdef EHMTXv2_USE_RTL
         this->config_->display->print(this->xpos() + xoffset, yoffset, font, color_, esphome::display::TextAlign::BASELINE_RIGHT,
                                       this->text.c_str());
@@ -274,8 +258,7 @@ namespace esphome
       }
       break;
       case MODE_TEXT_SCREEN:
-      case MODE_RAINBOW_TEXT:
-        color_ = (this->mode == MODE_RAINBOW_TEXT) ? this->config_->rainbow_color : this->text_color;
+        color_ = (this->rainbow) ? this->config_->rainbow_color : this->text_color;
 #ifdef EHMTXv2_USE_RTL
         this->config_->display->print(this->xpos() + xoffset, yoffset, font, color_, esphome::display::TextAlign::BASELINE_RIGHT,
                                       this->text.c_str());
@@ -321,7 +304,6 @@ namespace esphome
 
     switch (this->mode)
     {
-    case MODE_RAINBOW_TEXT:
     case MODE_TEXT_SCREEN:
 #ifdef EHMTXv2_SCROLL_SMALL_TEXT
       max_steps = (EHMTXv2_SCROLL_COUNT + 1) * (width - startx) + EHMTXv2_SCROLL_COUNT * this->pixels_;
@@ -340,7 +322,6 @@ namespace esphome
       }
 #endif
       break;
-    case MODE_RAINBOW_ICON:
     case MODE_BITMAP_SMALL:
     case MODE_ICON_SCREEN:
       startx = 8;

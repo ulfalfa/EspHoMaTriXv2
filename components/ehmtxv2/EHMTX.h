@@ -38,10 +38,6 @@ enum show_mode : uint8_t
   MODE_FULL_SCREEN = 4,
   MODE_ICON_SCREEN = 5,
   MODE_TEXT_SCREEN = 6,
-  MODE_RAINBOW_ICON = 7,
-  MODE_RAINBOW_TEXT = 8,
-  MODE_RAINBOW_CLOCK = 9,
-  MODE_RAINBOW_DATE = 10,
   MODE_BITMAP_SCREEN = 11,
   MODE_BITMAP_SMALL = 12
 };
@@ -167,18 +163,14 @@ namespace esphome
     void hide_alarm();
 
     void full_screen(std::string id, std::string icon, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME);
-    void icon_screen(std::string id, std::string icon, std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE);
-    void text_screen(std::string id, std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE);
-    void clock_screen(std::string id, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE);
-    void date_screen(std::string id, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE);
+    void icon_screen(std::string id, std::string icon, std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE, bool rainbow = true);
+    void text_screen(std::string id, std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE, bool rainbow = true);
+    void clock_screen(std::string id, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE, bool rainbow = true);
+    void date_screen(std::string id, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE, bool rainbow = true);
     void blank_screen(std::string id, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME);
     void bitmap_screen(std::string id, std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME);
     void color_gauge(std::string text);
-    void bitmap_small(std::string id, std::string, std::string, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE);
-    void rainbow_icon_screen(std::string id, std::string icon_name, std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true);
-    void rainbow_text_screen(std::string id, std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true);
-    void rainbow_clock_screen(std::string id, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true);
-    void rainbow_date_screen(std::string id, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true);
+    void bitmap_small(std::string id, std::string, std::string, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE, bool rainbow = true);
 
     void del_screen(std::string id);
 
@@ -212,6 +204,7 @@ namespace esphome
     uint16_t scroll_reset;
     Color text_color;
     show_mode mode;
+    bool rainbow;
 
 #ifdef USE_ESP32
     PROGMEM std::string text;
