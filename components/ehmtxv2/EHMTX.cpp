@@ -394,13 +394,13 @@ namespace esphome
       if (this->clock->now().is_valid())
       {
         ESP_LOGD(TAG, "time sync => start running");
-#if !defined USE_ESP8266 && !defined EHMTXv2_ALLOW_EMPTY_SCREEN
-        this->bitmap_screen(EHMTX_LOGO, 1, 10);
-        this->bitmap_small(EHMTX_SLOGO, EHMTX_VERSION, 1, 10);
+#if !defined USE_ESP8266
+        this->bitmap_screen("LOGO1", EHMTX_LOGO, 1, 1);
+        this->bitmap_small("LOGO2", EHMTX_SLOGO, EHMTX_VERSION, 1, 1);
 #endif
 #ifndef EHMTXv2_ALLOW_EMPTY_SCREEN
-        this->clock_screen(14 * 24 * 60, this->clock_time, EHMTXv2_DEFAULT_CLOCK_FONT, C_RED, C_GREEN, C_BLUE);
-        this->date_screen(14 * 24 * 60, (int)this->clock_time / 2, EHMTXv2_DEFAULT_CLOCK_FONT, C_RED, C_GREEN, C_BLUE);
+        this->clock_screen(CLOCK_ID, -1, this->clock_time, EHMTXv2_DEFAULT_CLOCK_FONT, C_RED, C_GREEN, C_BLUE);
+        this->date_screen(DATE_ID, -1, (int)this->clock_time / 2, EHMTXv2_DEFAULT_CLOCK_FONT, C_RED, C_GREEN, C_BLUE);
 #endif
         this->is_running = true;
       }
@@ -548,8 +548,6 @@ namespace esphome
         {
 #ifndef EHMTXv2_ALLOW_EMPTY_SCREEN
           ESP_LOGW(TAG, "tick: nothing to do. Restarting clock display!");
-          this->clock_screen(24 * 60, this->clock_time, false, C_RED, C_GREEN, C_BLUE);
-          this->date_screen(24 * 60, (int)this->clock_time / 2, false, C_RED, C_GREEN, C_BLUE);
           this->next_action_time = ts + this->clock_time;
 #endif
         }

@@ -163,14 +163,14 @@ namespace esphome
     void hide_alarm();
 
     void full_screen(std::string id, std::string icon, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME);
-    void icon_screen(std::string id, std::string icon, std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE, bool rainbow = true);
-    void text_screen(std::string id, std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE, bool rainbow = true);
-    void clock_screen(std::string id, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE, bool rainbow = true);
-    void date_screen(std::string id, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE, bool rainbow = true);
+    void icon_screen(std::string id, std::string icon, std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE, bool rainbow = false);
+    void text_screen(std::string id, std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE, bool rainbow = false);
+    void clock_screen(std::string id, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE, bool rainbow = false);
+    void date_screen(std::string id, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE, bool rainbow = false);
     void blank_screen(std::string id, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME);
     void bitmap_screen(std::string id, std::string text, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME);
     void color_gauge(std::string text);
-    void bitmap_small(std::string id, std::string, std::string, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE, bool rainbow = true);
+    void bitmap_small(std::string id, std::string, std::string, int lifetime = D_LIFETIME, int screen_time = D_SCREEN_TIME, bool default_font = true, int r = C_RED, int g = C_GREEN, int b = C_BLUE, bool rainbow = false);
 
     void del_screen(std::string id);
 
