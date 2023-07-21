@@ -140,7 +140,8 @@ namespace esphome
 
     screen->id = id;
     screen->text = "";
-    screen->endtime = this->clock->now().timestamp + lifetime * 60;
+    screen->endtime = (lifetime < 0) ? std::numeric_limits<time_t>::max() : this->clock->now().timestamp + lifetime * 60;
+
     screen->mode = MODE_BITMAP_SCREEN;
     screen->screen_time_ = screen_time;
     for (auto *t : on_add_screen_triggers_)
@@ -175,7 +176,8 @@ namespace esphome
     screen->id = id;
     screen->text = text;
     screen->text_color = Color(r, g, b);
-    screen->endtime = this->clock->now().timestamp + lifetime * 60;
+    screen->endtime = (lifetime < 0) ? std::numeric_limits<time_t>::max() : this->clock->now().timestamp + lifetime * 60;
+
     screen->mode = MODE_BITMAP_SMALL;
     screen->default_font = default_font;
     screen->calc_scroll_time(text, screen_time);
@@ -418,7 +420,7 @@ namespace esphome
       {
         ESP_LOGD(TAG, "force_screen: found position: %d", i);
         this->queue[i]->last_time = 0;
-        this->queue[i]->endtime += this->queue[i]->screen_time_;
+
         this->next_action_time = this->clock->now().timestamp;
         ESP_LOGW(TAG, "force_screen: id %s in mode %d", this->queue[i]->id.c_str(), this->queue[i]->mode);
       }
